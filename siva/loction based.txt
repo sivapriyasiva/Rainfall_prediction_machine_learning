@@ -1,0 +1,105 @@
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+# Read the dataset
+df = pd.read_csv("/content/overall district data.csv")
+
+# Ask user for input location
+user_location = input("Enter your location: ")
+
+# Filter the dataset by the input location
+filtered_df = df[df['Location'] == user_location]
+
+# If there is no data for the input location, exit the program
+if len(filtered_df) == 0:
+  print("No data found for the input location.")
+  exit()
+
+# Print the specific location data for the requested parameters
+print(filtered_df[['day', 'month', 'year','Location', 'Temperature', 'Percipitation', 'Wind_pressure', 'Allsky_Surfce_UV_INDEX']])
+
+
+
+user_input = input("Enter your date dd/mm/yyyy format : ")
+day, month, year = map(int, user_input.split('/'))
+
+
+# Filter the dataset by the input date
+mask = (filtered_df['day'] == day) & (filtered_df['month'] == month)
+
+filter = filtered_df[mask]
+
+
+# If there is no data for the input date, exit the program
+if len(filter) == 0:
+  print("No data found for the input date.")
+  exit()
+
+# Create a pandas Series with the rainfall data
+rainfall = pd.Series(filter['Percipitation'])
+print(f"{filter['year']} - {rainfall}", end=' ') 
+ # 2000-2022 year percipitation
+
+
+
+# If there is only one data point, exit the program
+if len(rainfall) <= 1:
+  print("Not enough data to make a prediction.")
+  exit()
+
+ #Create a numpy array for the input data
+X = np.array(range(len(rainfall))).reshape(-1, 1)
+X
+
+# Create a numpy array for the output data
+y = np.array(rainfall)
+y
+
+# Create a linear regression model and fit it to the data
+model = LinearRegression()
+model.fit(X, y)
+
+
+# Predict the output for the next data point
+next_input = np.array([[len(rainfall)]])
+next_output = model.predict(next_input)
+print(next_input )
+print(next_output)
+
+
+
+# Check if the predicted output is greater than or equal to 0.5
+if next_output >= 0.5:
+  final_output = 1
+else:
+  final_output = 0
+
+# Print the final output
+print(f"The final output of the rainfall is {final_output}.")
+if final_output == 1:
+  print("Today is rainfall")
+else:
+  print("Not expecting rainfall today")
+
+import matplotlib.pyplot as plt
+
+plt.bar(user_input,next_output)
+print(next_output)
+plt.plot(X,y , color='red')
+print(X)
+print(y)
+plt.xlabel('user_input')
+plt.ylabel('predict rainfall')
+plt.show()
+
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(10, 6)) #width =10, height=6
+plt.plot(filter['year'], rainfall)
+plt.title("year wise rainfall")
+plt.xlabel('Year')
+plt.ylabel('Rainfall')
+plt.show()
+
+
